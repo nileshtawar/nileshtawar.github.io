@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+<script>
+// This page is used as the MSAL popup redirect target.
+// It handles the auth response and closes the popup window.
+window.opener && window.opener.postMessage && window.close();
+</script>
+</body>
+</html>
