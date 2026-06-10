@@ -188,7 +188,8 @@
   const TENANT_ID = '1a2a8cea-6dab-42a4-9146-b7fedb5bcfe1';
   const REDIRECT  = 'https://nileshtawar.github.io/cctv_submission(7).html';
   const SCOPES    = ['Files.ReadWrite.All', 'User.Read'];
-  const FOLDER    = 'CCTV_Submissions_June2026';
+  const FOLDER       = 'CCTV_Submissions_June2026';
+  const WORKER_URL   = 'https://flat-frog-ce19.nilesht.workers.dev/';
 
   const msalInstance = new msal.PublicClientApplication({
     auth: { clientId: CLIENT_ID, authority: 'https://login.microsoftonline.com/' + TENANT_ID, redirectUri: REDIRECT },
@@ -323,24 +324,25 @@
   }
 
   async function uploadToOneDrive(file, fileName, token, onProgress) {
-    const fileBuffer = await file.arrayBuffer();
-    const fileSize   = fileBuffer.byteLength;
-    const sessionRes = await fetch(
-      'https://graph.microsoft.com/v1.0/users/6e6990d6-98f8-41b1-96e1-eaaa23ec500e/drive/root:/' + FOLDER + '/' + fileName + ':/createUploadSession',
-      { method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-        body:JSON.stringify({item:{'@microsoft.graph.conflictBehavior':'rename',name:fileName}}) }
-    );
-    if (!sessionRes.ok) { const e=await sessionRes.json().catch(()=>({})); throw new Error((e.error&&e.error.message)||'Session error HTTP '+sessionRes.status); }
-    const {uploadUrl} = await sessionRes.json();
-    const chunkSize=5*1024*1024; let offset=0, webUrl=null;
-    while (offset < fileSize) {
-      const end=Math.min(offset+chunkSize,fileSize), chunk=fileBuffer.slice(offset,end);
-      const res=await fetch(uploadUrl,{method:'PUT',headers:{'Content-Length':(end-offset).toString(),'Content-Range':'bytes '+offset+'-'+(end-1)+'/'+fileSize},body:chunk});
-      if (res.status===200||res.status===201){const d=await res.json();webUrl=d.webUrl;}
-      else if (res.status!==202){const e=await res.json().catch(()=>({}));throw new Error((e.error&&e.error.message)||'Chunk error HTTP '+res.status);}
-      offset=end; onProgress(10+Math.round((offset/fileSize)*88));
-    }
-    return webUrl||'https://onedrive.live.com';
+    // Send to Cloudflare Worker which uploads to Nilesh's OneDrive using app credentials
+    const formData = new FormData();
+    formData.append('file', file, fileName);
+    formData.append('fileName', fileName);
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', WORKER_URL);
+      xhr.upload.onprogress = ev => { if (ev.lengthComputable) onProgress(10 + Math.round((ev.loaded/ev.total)*88)); };
+      xhr.onload = () => {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.success) resolve('https://onedrive.live.com');
+          else reject(new Error(res.error || 'Upload failed'));
+        } catch(e) { reject(new Error('Invalid worker response')); }
+      };
+      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.send(formData);
+    });
   }
 
   function setBusy(busy,label){
