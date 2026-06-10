@@ -69,9 +69,11 @@
   .rename-pill.show { display:flex; }
   .signin-banner { display:none; align-items:center; gap:12px; background:var(--primary-light); border:1px solid var(--border); border-radius:6px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:var(--primary); line-height:1.6; }
   .signin-banner.show { display:flex; }
-  .btn-submit { width:100%; padding:13px 20px; font-family:var(--sans); font-size:14px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:var(--primary); border:none; border-radius:6px; cursor:pointer; transition:background .2s,box-shadow .2s,transform .1s; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 2px 8px rgba(26,58,92,.3); }
-  .btn-submit:hover:not(:disabled) { background:var(--primary-dark); box-shadow:0 4px 14px rgba(26,58,92,.4); }
-  .btn-submit:active:not(:disabled) { transform:scale(.99); }
+  /* Saving state overlay */
+  .saving-state { display:none; text-align:center; padding:20px; font-size:13px; color:var(--primary); font-family:var(--mono); }
+  .saving-state.show { display:block; }
+  .btn-submit { width:100%; padding:13px 20px; font-family:var(--sans); font-size:14px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:var(--primary); border:none; border-radius:6px; cursor:pointer; transition:background .2s,box-shadow .2s; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 2px 8px rgba(26,58,92,.3); }
+  .btn-submit:hover:not(:disabled) { background:var(--primary-dark); }
   .btn-submit:disabled { background:#9bafc2; cursor:not-allowed; box-shadow:none; }
   .spinner { display:none; width:15px; height:15px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
   @keyframes spin { to{transform:rotate(360deg)} }
@@ -92,24 +94,6 @@
 </style>
 </head>
 <body>
-
-<script>
-// ── MSAL Popup handler ──
-// If this page is loaded inside a popup window as a redirect target, handle it and close
-(function() {
-  if (window.opener && window.location.hash && (window.location.hash.includes('code=') || window.location.hash.includes('access_token=') || window.location.hash.includes('error='))) {
-    // Let MSAL process the response then close
-    try {
-      // MSAL will handle this via handleRedirectPromise in the opener
-      window.close();
-    } catch(e) {}
-  }
-  // Also handle query string responses
-  if (window.opener && window.location.search && (window.location.search.includes('code=') || window.location.search.includes('error='))) {
-    try { window.close(); } catch(e) {}
-  }
-})();
-</script>
 
 <div class="topbar">
   <div class="topbar-brand">
@@ -169,7 +153,11 @@
 
     <div class="card-section">
       <div class="signin-banner" id="signinBanner">
-        <div id="signinInfo">🔐 A Microsoft sign-in is required to authorise the upload to MKCL OneDrive</div>
+        <div id="signinInfo">🔐 Microsoft sign-in required to authorise the upload</div>
+      </div>
+      <!-- Shown while returning from redirect login -->
+      <div class="saving-state" id="savingState">
+        ⏳ Completing sign-in and uploading your file…
       </div>
       <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
         <span class="spinner" id="spinner"></span>
@@ -187,38 +175,52 @@
 </div>
 
 <script>
-  // ── Config ──
+  const CLIENT_ID  = 'aa704af0-7398-4604-92b9-848114a1b067';
+  const TENANT_ID  = '1a2a8cea-6dab-42a4-9146-b7fedb5bcfe1';
+  const REDIRECT   = 'https://nileshtawar.github.io/cctv_submission(7).html';
+  const SCOPES     = ['Files.ReadWrite', 'User.Read'];
+  const FOLDER     = 'CCTV_Submissions_June2026';
+  const STATE_KEY  = 'mkcl_form_state';
+
   const MSAL_CONFIG = {
-    auth: {
-      clientId: 'aa704af0-7398-4604-92b9-848114a1b067',
-      authority: 'https://login.microsoftonline.com/1a2a8cea-6dab-42a4-9146-b7fedb5bcfe1',
-      redirectUri: 'https://nileshtawar.github.io/cctv_submission(7).html',
-      postLogoutRedirectUri: 'https://nileshtawar.github.io/cctv_submission(7).html'
-    },
-    cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: true },
-    system: { allowNativeBroker: false, windowHashTimeout: 9000, iframeHashTimeout: 9000 }
+    auth: { clientId: CLIENT_ID, authority: 'https://login.microsoftonline.com/' + TENANT_ID, redirectUri: REDIRECT },
+    cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
+    system: { allowNativeBroker: false }
   };
-  const SCOPES = ['Files.ReadWrite', 'User.Read'];
-  const ONEDRIVE_FOLDER = 'CCTV_Submissions_June2026';
 
   const msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
   let accessToken = null, selectedFile = null;
 
+  // ── Init: handle redirect first ──
   async function initMsal() {
     await msalInstance.initialize();
+
+    let redirectResult = null;
     try {
-      const r = await msalInstance.handleRedirectPromise();
-      if (r && r.accessToken) {
-        accessToken = r.accessToken;
-        updateSignInUI(r.account);
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return;
-      }
+      redirectResult = await msalInstance.handleRedirectPromise();
     } catch(e) {
-      console.error('Redirect error:', e);
-      window.history.replaceState({}, document.title, window.location.pathname);
+      console.error('handleRedirectPromise error:', e);
+      window.history.replaceState({}, '', REDIRECT);
     }
-    // Restore session silently if already signed in
+
+    if (redirectResult && redirectResult.accessToken) {
+      // Came back from redirect login — restore form state and upload
+      accessToken = redirectResult.accessToken;
+      updateSignInUI(redirectResult.account);
+      window.history.replaceState({}, '', REDIRECT);
+
+      const saved = getSavedState();
+      if (saved) {
+        restoreForm(saved);
+        // File can't survive a redirect — ask user to re-select
+        showStatus('info', '✅ Signed in as <strong>' + redirectResult.account.username + '</strong>. Your form has been restored — please re-select your ZIP file and click Submit again.');
+        clearSavedState();
+        setStep(2, true);
+      }
+      return;
+    }
+
+    // Check silent token
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) {
       try {
@@ -229,6 +231,26 @@
     }
   }
   initMsal();
+
+  // ── Form state persistence (survives redirect) ──
+  function saveState() {
+    const state = {
+      alcCode:   document.getElementById('alcCode').value,
+      alcName:   document.getElementById('alcName').value,
+      examEvent: document.getElementById('examEvent').value
+    };
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  }
+  function getSavedState() {
+    try { return JSON.parse(localStorage.getItem(STATE_KEY)); } catch(e) { return null; }
+  }
+  function restoreForm(state) {
+    if (!state) return;
+    document.getElementById('alcCode').value   = state.alcCode || '';
+    document.getElementById('alcName').value   = state.alcName || '';
+    document.getElementById('examEvent').value = state.examEvent || '';
+  }
+  function clearSavedState() { localStorage.removeItem(STATE_KEY); }
 
   // ── File drop ──
   const dropZone = document.getElementById('dropZone');
@@ -246,7 +268,7 @@
     updatePreview();
   }
 
-  ['alcCode', 'examEvent'].forEach(id => document.getElementById(id).addEventListener('input', updatePreview));
+  ['alcCode','examEvent'].forEach(id => document.getElementById(id).addEventListener('input', updatePreview));
 
   function updatePreview() {
     const code = document.getElementById('alcCode').value.trim();
@@ -269,44 +291,25 @@
     return true;
   }
 
-  async function getToken() {
-    const accounts = msalInstance.getAllAccounts();
-    if (!accounts.length) return null;
-    try {
-      const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
-      return r.accessToken;
-    } catch(e) {
-      const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
-      return r.accessToken;
-    }
-  }
-
-  function updateSignInUI(account) {
-    if (!account) return;
-    document.getElementById('signinInfo').innerHTML = '✅ Signed in as <strong>' + account.username + '</strong>';
-    document.getElementById('signinBanner').classList.add('show');
-    setStep(2, true);
-  }
-
   async function handleSubmit() {
     clearStatus();
     if (!validate()) return;
-    setBusy(true, 'Signing in…'); setStep(2);
 
-    try {
-      accessToken = await getToken();
-      if (!accessToken) {
-        const r = await msalInstance.loginPopup({ scopes: SCOPES, prompt: 'select_account' });
-        accessToken = r.accessToken;
-        updateSignInUI(r.account);
-      }
-    } catch(e) {
-      showStatus('error', '❌ Sign-in failed: ' + e.message);
-      setBusy(false); setStep(1); return;
+    // If not signed in, save form state and do redirect login
+    if (!accessToken) {
+      saveState();
+      setStep(2);
+      await msalInstance.loginRedirect({ scopes: SCOPES, prompt: 'select_account' });
+      return; // page will reload
     }
 
-    const alcCode = document.getElementById('alcCode').value.trim();
-    const alcName = document.getElementById('alcName').value.trim();
+    // Already signed in — go straight to upload
+    await doUpload();
+  }
+
+  async function doUpload() {
+    const alcCode   = document.getElementById('alcCode').value.trim();
+    const alcName   = document.getElementById('alcName').value.trim();
     const examEvent = document.getElementById('examEvent').value.trim();
     const newFileName = alcCode + '_June-2026EE.zip';
 
@@ -325,6 +328,15 @@
       document.getElementById('btnLabel').textContent = 'Submitted ✓';
       setStep(3, true);
     } catch(err) {
+      // Token may have expired — try silent refresh
+      if (err.message.includes('401') || err.message.includes('token')) {
+        try {
+          const accounts = msalInstance.getAllAccounts();
+          const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
+          accessToken = r.accessToken;
+          await doUpload(); return;
+        } catch(e2) { /* fall through */ }
+      }
       showStatus('error', '❌ Upload failed: ' + err.message);
       setBusy(false); setStep(2, true);
     }
@@ -333,56 +345,43 @@
   async function uploadToOneDrive(file, fileName, token, onProgress) {
     const fileBuffer = await file.arrayBuffer();
     const fileSize = fileBuffer.byteLength;
-
     const sessionRes = await fetch(
-      'https://graph.microsoft.com/v1.0/me/drive/root:/' + ONEDRIVE_FOLDER + '/' + fileName + ':/createUploadSession',
-      {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item: { '@microsoft.graph.conflictBehavior': 'rename', name: fileName } })
-      }
+      'https://graph.microsoft.com/v1.0/me/drive/root:/' + FOLDER + '/' + fileName + ':/createUploadSession',
+      { method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+        body:JSON.stringify({item:{'@microsoft.graph.conflictBehavior':'rename',name:fileName}}) }
     );
-
-    if (!sessionRes.ok) {
-      const err = await sessionRes.json().catch(() => ({}));
-      throw new Error((err.error && err.error.message) || 'Session error HTTP ' + sessionRes.status);
-    }
-
-    const { uploadUrl } = await sessionRes.json();
-    const chunkSize = 5 * 1024 * 1024;
-    let offset = 0, webUrl = null;
-
+    if (!sessionRes.ok) { const e=await sessionRes.json().catch(()=>({})); throw new Error((e.error&&e.error.message)||'Session error HTTP '+sessionRes.status); }
+    const {uploadUrl} = await sessionRes.json();
+    const chunkSize = 5*1024*1024; let offset=0, webUrl=null;
     while (offset < fileSize) {
-      const end = Math.min(offset + chunkSize, fileSize);
-      const chunk = fileBuffer.slice(offset, end);
-      const res = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Length': (end - offset).toString(), 'Content-Range': 'bytes ' + offset + '-' + (end-1) + '/' + fileSize },
-        body: chunk
-      });
-      if (res.status === 200 || res.status === 201) { const d = await res.json(); webUrl = d.webUrl; }
-      else if (res.status !== 202) { const e = await res.json().catch(() => ({})); throw new Error((e.error && e.error.message) || 'Upload error HTTP ' + res.status); }
-      offset = end;
-      onProgress(10 + Math.round((offset / fileSize) * 88));
+      const end=Math.min(offset+chunkSize,fileSize), chunk=fileBuffer.slice(offset,end);
+      const res=await fetch(uploadUrl,{method:'PUT',headers:{'Content-Length':(end-offset).toString(),'Content-Range':'bytes '+offset+'-'+(end-1)+'/'+fileSize},body:chunk});
+      if (res.status===200||res.status===201) { const d=await res.json(); webUrl=d.webUrl; }
+      else if (res.status!==202) { const e=await res.json().catch(()=>({})); throw new Error((e.error&&e.error.message)||'Chunk error HTTP '+res.status); }
+      offset=end; onProgress(10+Math.round((offset/fileSize)*88));
     }
-    return webUrl || 'https://onedrive.live.com';
+    return webUrl||'https://onedrive.live.com';
   }
 
-  function setBusy(busy, label) {
-    const btn = document.getElementById('submitBtn'), sp = document.getElementById('spinner'), lbl = document.getElementById('btnLabel');
-    btn.disabled = busy; sp.style.display = busy ? 'block' : 'none';
-    if (label) lbl.textContent = label;
-    if (!busy && lbl.textContent !== 'Submitted ✓') lbl.textContent = 'Submit & Upload to OneDrive';
+  function updateSignInUI(account) {
+    if (!account) return;
+    document.getElementById('signinInfo').innerHTML = '✅ Signed in as <strong>' + account.username + '</strong>';
+    document.getElementById('signinBanner').classList.add('show');
+    setStep(2, true);
   }
-  function showProgress(pct) { document.getElementById('progressWrap').classList.add('show'); document.getElementById('progressBar').style.width = pct + '%'; }
-  function showStatus(type, msg) { const b = document.getElementById('statusBox'); b.className = 'status-box ' + type; b.innerHTML = msg; }
-  function clearStatus() { const b = document.getElementById('statusBox'); b.className = 'status-box'; b.innerHTML = ''; }
-  function setStep(n, done) {
+  function setBusy(busy,label) {
+    const btn=document.getElementById('submitBtn'),sp=document.getElementById('spinner'),lbl=document.getElementById('btnLabel');
+    btn.disabled=busy; sp.style.display=busy?'block':'none';
+    if(label)lbl.textContent=label;
+    if(!busy&&lbl.textContent!=='Submitted ✓')lbl.textContent='Submit & Upload to OneDrive';
+  }
+  function showProgress(pct) { document.getElementById('progressWrap').classList.add('show'); document.getElementById('progressBar').style.width=pct+'%'; }
+  function showStatus(type,msg) { const b=document.getElementById('statusBox'); b.className='status-box '+type; b.innerHTML=msg; }
+  function clearStatus() { const b=document.getElementById('statusBox'); b.className='status-box'; b.innerHTML=''; }
+  function setStep(n,done) {
     [1,2,3].forEach(i => {
-      const el = document.getElementById('step' + i);
-      el.classList.remove('active','done');
-      if (i < n || (i === n && done)) el.classList.add('done');
-      else if (i === n) el.classList.add('active');
+      const el=document.getElementById('step'+i); el.classList.remove('active','done');
+      if(i<n||(i===n&&done))el.classList.add('done'); else if(i===n)el.classList.add('active');
     });
   }
 </script>
