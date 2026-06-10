@@ -187,7 +187,7 @@
   const CLIENT_ID = 'aa704af0-7398-4604-92b9-848114a1b067';
   const TENANT_ID = '1a2a8cea-6dab-42a4-9146-b7fedb5bcfe1';
   const REDIRECT  = 'https://nileshtawar.github.io/cctv_submission(7).html';
-  const SCOPES    = ['Files.ReadWrite', 'User.Read'];
+  const SCOPES    = ['Files.ReadWrite.All', 'User.Read'];
   const FOLDER    = 'CCTV_Submissions_June2026';
 
   const msalInstance = new msal.PublicClientApplication({
@@ -326,7 +326,7 @@
     const fileBuffer = await file.arrayBuffer();
     const fileSize   = fileBuffer.byteLength;
     const sessionRes = await fetch(
-      'https://graph.microsoft.com/v1.0/me/drive/root:/' + FOLDER + '/' + fileName + ':/createUploadSession',
+      'https://graph.microsoft.com/v1.0/users/6e6990d6-98f8-41b1-96e1-eaaa23ec500e/drive/root:/' + FOLDER + '/' + fileName + ':/createUploadSession',
       { method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
         body:JSON.stringify({item:{'@microsoft.graph.conflictBehavior':'rename',name:fileName}}) }
     );
