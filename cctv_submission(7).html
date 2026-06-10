@@ -204,8 +204,7 @@
     try {
       const r = await msalInstance.handleRedirectPromise();
       if (r && r.accessToken) {
-        accessToken = r.accessToken;
-        setSignedIn(r.account);
+        setSignedIn(r.account, r.accessToken);
         window.history.replaceState({}, '', REDIRECT);
         return;
       }
@@ -218,8 +217,7 @@
     if (accounts.length > 0) {
       try {
         const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
-        accessToken = r.accessToken;
-        setSignedIn(accounts[0]);
+        setSignedIn(accounts[0], r.accessToken);
       } catch(e) { /* user will click sign in */ }
     }
   }
@@ -237,8 +235,9 @@
     msalInstance.logoutRedirect({ postLogoutRedirectUri: REDIRECT });
   }
 
-  function setSignedIn(account) {
-    accessToken = account ? accessToken : null;
+  function setSignedIn(account, token) {
+    if (token) accessToken = token;
+    else if (!account) accessToken = null;
     const status = document.getElementById('authStatus');
     const btnIn  = document.getElementById('btnSignin');
     const btnOut = document.getElementById('btnSignout');
