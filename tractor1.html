@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>हिरवं रान, लाल राजा · महाराष्ट्राची शेती</title>
+<meta name="description" content="महाराष्ट्राच्या हिरव्यागार शेतातला लाल ट्रॅक्टर — खरीप हंगामाची एक नॉस्टॅल्जिक सफर." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Kalam:wght@400;700&family=Mukta:wght@400;600;800&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky1:#bfe6ec; --sky2:#a9d8cd; --sky3:#cdeccb; --cloud:#f3f8f5;
+  --hill-far:#7fb4a2; --hill-mid:#5ea083; --hill-near:#3f8f60;
+  --field1:#63bd4f; --field2:#48a637; --field3:#348a25; --field4:#26721b; --field5:#1c5a17;
+  --soil:#7c4a2b; --soil-d:#5b3520;
+  --red:#d8352c; --red-d:#a11c18; --red-l:#f15a4c; --red-dd:#7c1512;
+  --gold:#ffc23c; --marigold:#ff9f1c; --saffron:#ff7a1a;
+  --ink:#0f2a17; --cream:#fff8ec; --glass:rgba(255,255,255,.14);
+  --glass-brd:rgba(255,255,255,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Mukta',system-ui,sans-serif;
+  color:var(--cream);
+  background:#0f2a17;
+  overflow-x:hidden;
+  min-height:100vh;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------------- SCENE ---------------- */
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden}
+.sky{position:absolute;inset:0;
+  background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 42%,var(--sky3) 66%,#bfe2ac 100%);}
+.sun{position:absolute;top:12%;left:16%;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,247,214,.95),rgba(255,241,190,.5) 45%,rgba(255,241,190,0) 70%);
+  filter:blur(2px);animation:sunPulse 8s ease-in-out infinite}
+@keyframes sunPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
+
+.rainbow{position:absolute;left:50%;top:20%;width:min(1400px,120vw);transform:translateX(-50%);opacity:.9;pointer-events:none;animation:rbGlow 10s ease-in-out infinite}
+@keyframes rbGlow{0%,100%{opacity:.55}50%{opacity:.9}}
+
+.clouds{position:absolute;inset:0;pointer-events:none}
+.cloud{position:absolute;background:var(--cloud);border-radius:50%;filter:blur(14px);opacity:.85}
+.cloud::before,.cloud::after{content:"";position:absolute;background:var(--cloud);border-radius:50%}
+.c1{width:220px;height:64px;top:15%;left:-24%;animation:drift1 70s linear infinite}
+.c1::before{width:120px;height:120px;top:-56px;left:34px}
+.c1::after{width:90px;height:90px;top:-40px;left:120px}
+.c2{width:280px;height:74px;top:26%;left:-40%;opacity:.7;animation:drift2 95s linear infinite}
+.c2::before{width:140px;height:140px;top:-64px;left:50px}
+.c2::after{width:100px;height:100px;top:-44px;left:150px}
+.c3{width:180px;height:54px;top:9%;left:-30%;opacity:.6;animation:drift1 120s linear infinite}
+.c3::before{width:90px;height:90px;top:-40px;left:24px}
+.c3::after{width:70px;height:70px;top:-30px;left:92px}
+@keyframes drift1{to{transform:translateX(160vw)}}
+@keyframes drift2{to{transform:translateX(180vw)}}
+
+.landscape{position:absolute;left:0;bottom:0;width:100%;height:78%;display:block}
+
+.birds{position:absolute;inset:0;pointer-events:none}
+.bird{position:absolute;width:26px;height:14px;opacity:.55}
+.bird svg{width:100%;height:100%}
+.bird path{stroke:#20402b;stroke-width:2.4;fill:none;stroke-linecap:round;animation:flap 1.1s ease-in-out infinite}
+.bA{top:22%;left:-6%;animation:fly1 34s linear infinite}
+.bB{top:28%;left:-14%;transform:scale(.8);animation:fly1 44s linear infinite 4s}
+.bC{top:18%;left:-24%;transform:scale(.65);animation:fly1 54s linear infinite 10s}
+@keyframes fly1{to{transform:translate(120vw,-6vh)}}
+@keyframes flap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.5)}}
+
+.drizzle{position:absolute;inset:0;pointer-events:none;opacity:.14;
+  background:repeating-linear-gradient(102deg,transparent 0 22px,rgba(255,255,255,.9) 22px 23px);
+  background-size:200px 200px;animation:rain 0.7s linear infinite}
+@keyframes rain{to{background-position:-40px 200px}}
+
+.petals{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.petal{position:absolute;top:-24px;border-radius:60% 60% 60% 0;will-change:transform,opacity}
+
+/* ---------------- FOREGROUND / VIGNETTE ---------------- */
+.grain{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+.vignette{position:fixed;inset:0;z-index:5;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 42%,transparent 55%,rgba(10,32,18,.32) 100%)}
+
+/* ---------------- HERO ---------------- */
+.hero{position:relative;z-index:4;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;text-align:center;
+  padding:34px 20px 190px;gap:6px}
+
+.kicker{font-family:'Baloo 2';font-weight:800;letter-spacing:.42em;font-size:clamp(11px,1.5vw,15px);
+  text-transform:uppercase;color:#0f3a1e;
+  background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);
+  padding:7px 18px 5px;border-radius:999px;backdrop-filter:blur(6px);
+  box-shadow:0 6px 22px rgba(15,42,23,.18);text-indent:.42em}
+
+.title{font-family:'Yatra One';font-weight:400;line-height:.98;
+  font-size:clamp(46px,10vw,132px);margin-top:6px;
+  color:#fff;
+  text-shadow:0 2px 0 var(--red-d),0 10px 30px rgba(12,32,18,.45),0 1px 2px rgba(0,0,0,.3);
+  letter-spacing:.01em}
+.title .red{color:var(--gold);text-shadow:0 2px 0 var(--red-dd),0 10px 26px rgba(120,20,10,.5)}
+.title .grn{color:#eafff0;text-shadow:0 2px 0 #1c5a17,0 10px 26px rgba(12,60,20,.5)}
+
+.subtitle{font-family:'Kalam';font-weight:700;font-size:clamp(16px,2.6vw,26px);
+  color:#fffdf5;text-shadow:0 2px 8px rgba(12,40,20,.5);margin-top:2px;
+  transform:rotate(-1.2deg)}
+.subtitle .dot{color:var(--gold)}
+
+/* rotating quote */
+.quote-wrap{margin-top:16px;min-height:96px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;max-width:820px;perspective:600px}
+.quote{font-family:'Kalam';font-weight:700;font-size:clamp(20px,3.6vw,38px);
+  color:#fffef8;line-height:1.28;text-shadow:0 3px 14px rgba(10,32,18,.55);
+  transition:opacity .7s ease,transform .7s ease;opacity:0;transform:translateY(14px)}
+.quote.show{opacity:1;transform:translateY(0)}
+.quote-en{font-family:'Mukta';font-weight:400;font-style:italic;font-size:clamp(11px,1.5vw,14px);
+  color:rgba(255,255,255,.72);margin-top:8px;letter-spacing:.02em;
+  transition:opacity .7s ease;opacity:0}
+.quote-en.show{opacity:.8}
+.sprig{color:var(--gold);font-size:.7em;margin:0 .3em;opacity:.9}
+
+/* stage row */
+.stage-row{margin-top:6px;display:flex;align-items:flex-end;justify-content:center;
+  gap:28px;flex-wrap:wrap;width:100%;max-width:1180px}
+
+.tractor-stage{position:relative;width:min(600px,88vw);
+  filter:drop-shadow(0 30px 30px rgba(10,32,18,.30))}
+.tractor{position:relative;cursor:pointer;transform-origin:60% 90%;
+  animation:idle 0.32s ease-in-out infinite alternate}
+.tractor svg{width:100%;height:auto;display:block;overflow:visible}
+@keyframes idle{from{transform:translateY(0) rotate(-.12deg)}to{transform:translateY(-1.6px) rotate(.12deg)}}
+.tractor.honk{animation:honk .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes honk{0%{transform:translateY(0) rotate(0)}18%{transform:translateY(-22px) rotate(-2.2deg)}
+  40%{transform:translateY(4px) rotate(1.4deg)}62%{transform:translateY(-8px) rotate(-.8deg)}100%{transform:translateY(0)}}
+.tractor:hover{filter:brightness(1.04)}
+
+.wheel-rot{transform-box:fill-box;transform-origin:center;}
+.wheel-rot.spin{animation:spin .95s cubic-bezier(.25,.6,.3,1)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.ground-shadow{position:absolute;left:8%;right:6%;bottom:-6px;height:34px;
+  background:radial-gradient(50% 60% at 50% 50%,rgba(8,30,16,.45),transparent 72%);
+  filter:blur(3px);z-index:-1}
+
+.anchor{position:absolute;width:2px;height:2px}
+#exhaust{left:34.5%;top:9%}
+#dust{left:24%;top:88%}
+
+.honk-bubble{position:absolute;left:52%;top:-8%;transform:translate(-50%,10px) scale(.6);
+  font-family:'Baloo 2';font-weight:800;font-size:clamp(18px,3vw,30px);color:var(--red-d);
+  background:#fff;padding:8px 16px;border-radius:16px;opacity:0;pointer-events:none;
+  box-shadow:0 10px 24px rgba(10,32,18,.3);white-space:nowrap}
+.honk-bubble::after{content:"";position:absolute;left:26px;bottom:-9px;border:9px solid transparent;
+  border-top-color:#fff;border-bottom:0}
+.honk-bubble.show{animation:pop 1s ease}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,10px) scale(.5)}
+  22%{opacity:1;transform:translate(-50%,0) scale(1.05)}70%{opacity:1;transform:translate(-50%,-4px) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-16px) scale(.9)}}
+
+.smoke{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(120,120,120,.5),rgba(90,90,90,.15) 70%,transparent);
+  pointer-events:none;will-change:transform,opacity}
+.dust{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(150,110,70,.7),rgba(120,85,50,.2) 70%,transparent);
+  pointer-events:none;will-change:transform,opacity}
+
+/* status card */
+.status-card{position:relative;width:min(300px,88vw);text-align:left;
+  background:var(--glass);border:1px solid var(--glass-brd);border-radius:22px;
+  padding:18px 20px;backdrop-filter:blur(14px) saturate(1.2);
+  box-shadow:0 14px 40px rgba(10,32,18,.28);margin-bottom:20px}
+.status-card h3{font-family:'Baloo 2';font-weight:800;font-size:15px;letter-spacing:.16em;
+  text-transform:uppercase;color:#eafff0;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.status-card h3 .live{width:9px;height:9px;border-radius:50%;background:#7dff9a;
+  box-shadow:0 0 0 0 rgba(125,255,154,.7);animation:live 1.6s infinite}
+@keyframes live{0%{box-shadow:0 0 0 0 rgba(125,255,154,.6)}70%{box-shadow:0 0 0 10px rgba(125,255,154,0)}100%{box-shadow:0 0 0 0 rgba(125,255,154,0)}}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.18);font-size:15px}
+.srow:last-child{border-bottom:0}
+.srow .k{color:rgba(255,255,255,.72);font-weight:400}
+.srow .v{font-weight:800;color:#fffef6;display:flex;align-items:center;gap:7px}
+.pill{font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px;
+  background:rgba(125,255,154,.2);color:#c7ffd4;border:1px solid rgba(125,255,154,.4)}
+.pill.warn{background:rgba(255,194,60,.2);color:#ffe6a6;border-color:rgba(255,194,60,.45)}
+
+/* memory chips */
+.memories{margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:720px}
+.chip{font-family:'Mukta';font-weight:600;font-size:13px;color:#0f3a1e;
+  background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.7);
+  padding:7px 14px;border-radius:999px;backdrop-filter:blur(6px);cursor:default;
+  transition:transform .3s ease,background .3s ease;box-shadow:0 6px 16px rgba(15,42,23,.14);
+  animation:chipFloat 5s ease-in-out infinite}
+.chip:nth-child(2n){animation-delay:-1.4s}
+.chip:nth-child(3n){animation-delay:-2.6s}
+.chip:hover{transform:translateY(-4px) scale(1.05);background:var(--gold);color:#5b2b00}
+.chip .em{margin-right:5px}
+@keyframes chipFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+.hint{margin-top:22px;font-family:'Mukta';font-size:13px;color:rgba(255,255,255,.82);
+  background:rgba(15,42,23,.28);padding:8px 16px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(6px)}
+.hint kbd{font-family:'Baloo 2';font-weight:800;background:#fff;color:var(--red-d);
+  padding:1px 8px;border-radius:6px;font-size:12px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+
+/* ---------------- MUSIC PLAYER ---------------- */
+.player{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:8;
+  width:min(560px,94vw);
+  background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.08));
+  border:1px solid var(--glass-brd);border-radius:26px;
+  padding:14px 18px;backdrop-filter:blur(20px) saturate(1.3);
+  box-shadow:0 18px 50px rgba(8,26,14,.4),inset 0 1px 0 rgba(255,255,255,.35);
+  display:flex;align-items:center;gap:14px}
+
+.disc{position:relative;width:56px;height:56px;flex:0 0 56px;border-radius:50%;
+  display:grid;place-items:center;background:#161b17;
+  box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 0 0 3px rgba(255,255,255,.06)}
+.disc svg{width:52px;height:52px;animation:wheelspin 4s linear infinite;animation-play-state:paused}
+.player.playing .disc svg{animation-play-state:running}
+@keyframes wheelspin{to{transform:rotate(360deg)}}
+
+.pmeta{flex:1 1 auto;min-width:0}
+.pnow{font-family:'Baloo 2';font-weight:800;font-size:10px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
+.eq{display:inline-flex;gap:2px;align-items:flex-end;height:10px}
+.eq i{width:2px;height:4px;background:var(--gold);border-radius:1px;animation:eq .9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}.eq i:nth-child(4){animation-delay:.1s}
+.player:not(.playing) .eq i{animation-play-state:paused;height:4px}
+@keyframes eq{0%,100%{height:3px}50%{height:10px}}
+.ptitle{font-family:'Mukta';font-weight:600;font-size:15px;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.prog{margin-top:7px;display:flex;align-items:center;gap:8px}
+.ptime{font-size:10px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;min-width:32px}
+.bar{position:relative;flex:1 1 auto;height:6px;border-radius:999px;background:rgba(255,255,255,.22);cursor:pointer}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--gold),var(--saffron))}
+.bar .knob{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:#fff;
+  transform:translate(-50%,-50%);left:0;box-shadow:0 2px 6px rgba(0,0,0,.35);opacity:0;transition:opacity .2s}
+.bar:hover .knob{opacity:1}
+
+.pctrls{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.pbtn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer;
+  transition:transform .15s ease,background .2s ease}
+.pbtn:hover{background:rgba(255,255,255,.26);transform:translateY(-2px)}
+.pbtn:active{transform:scale(.92)}
+.pbtn svg{width:18px;height:18px;fill:#fff}
+.pbtn.play{width:52px;height:52px;background:linear-gradient(135deg,var(--red-l),var(--red-d));
+  border-color:rgba(255,255,255,.4);box-shadow:0 8px 20px rgba(160,28,24,.5)}
+.pbtn.play svg{width:22px;height:22px}
+.pbtn.mute{width:34px;height:34px}
+.pbtn.mute svg{width:15px;height:15px}
+#yt{position:fixed;width:1px;height:1px;left:0;bottom:0;opacity:0;pointer-events:none;z-index:-1}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media(max-width:720px){
+  .hero{padding:22px 14px 200px}
+  .kicker{letter-spacing:.28em;text-indent:.28em}
+  .stage-row{gap:8px}
+  .status-card{margin-bottom:0}
+  .player{gap:8px;padding:12px 12px;border-radius:22px}
+  .disc{width:44px;height:44px;flex-basis:44px}.disc svg{width:40px;height:40px}
+  .pbtn{width:36px;height:36px}.pbtn.play{width:46px;height:46px}
+  .pctrls .pbtn.mute{display:none}
+  .ptime{display:none}
+  .drizzle{opacity:.08}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important}
+  .drizzle,.sun,.clouds{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= SCENE ================= -->
+<div class="scene" id="scene">
+  <div class="sky" data-depth="2"></div>
+  <div class="sun" data-depth="4"></div>
+
+  <svg class="rainbow" data-depth="6" viewBox="0 0 1440 520" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="rb" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff6b6b"/><stop offset=".2" stop-color="#ffb347"/>
+        <stop offset=".4" stop-color="#fff275"/><stop offset=".6" stop-color="#8ee06b"/>
+        <stop offset=".8" stop-color="#6bc9ff"/><stop offset="1" stop-color="#b58bff"/>
+      </linearGradient>
+      <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
+    </defs>
+    <path d="M 200 520 A 520 520 0 0 1 1240 520" fill="none" stroke="url(#rb)" stroke-width="30" opacity=".5" filter="url(#soft)"/>
+  </svg>
+
+  <div class="clouds" data-depth="8">
+    <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  </div>
+
+  <div class="birds" data-depth="10">
+    <div class="bird bA"><svg viewBox="0 0 26 14"><path d="M2 10 Q7 2 13 8 Q19 2 24 10"/></svg></div>
+    <div class="bird bB"><svg viewBox="0 0 26 14"><path d="M2 10 Q7 2 13 8 Q19 2 24 10"/></svg></div>
+    <div class="bird bC"><svg viewBox="0 0 26 14"><path d="M2 10 Q7 2 13 8 Q19 2 24 10"/></svg></div>
+  </div>
+
+  <!-- layered green landscape -->
+  <svg class="landscape" data-depth="5" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="hf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8cc0af"/><stop offset="1" stop-color="#6ba792"/></linearGradient>
+      <linearGradient id="hm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ea083"/><stop offset="1" stop-color="#4c9070"/></linearGradient>
+      <linearGradient id="f1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#63bd4f"/><stop offset="1" stop-color="#54ad42"/></linearGradient>
+      <linearGradient id="f2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4aa838"/><stop offset="1" stop-color="#3d9a2e"/></linearGradient>
+      <linearGradient id="f3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#348a25" /><stop offset="1" stop-color="#2b7a1e"/></linearGradient>
+      <linearGradient id="f4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26721b"/><stop offset="1" stop-color="#1c5a17"/></linearGradient>
+      <pattern id="rows3" width="34" height="12" patternUnits="userSpaceOnUse" patternTransform="skewX(-6)">
+        <rect width="34" height="12" fill="#2b7a1e"/><rect width="5" height="12" fill="#237018" opacity=".55"/>
+      </pattern>
+      <pattern id="rows4" width="46" height="16" patternUnits="userSpaceOnUse" patternTransform="skewX(-10)">
+        <rect width="46" height="16" fill="#1c5a17"/><rect width="7" height="16" fill="#164a12" opacity=".6"/>
+        <rect x="23" width="2" height="16" fill="#2e7a24" opacity=".4"/>
+      </pattern>
+      <clipPath id="clip3"><path d="M0 560 C 360 500 620 600 900 555 C 1130 520 1300 575 1440 545 L1440 720 L0 720 Z"/></clipPath>
+      <clipPath id="clip4"><path d="M0 690 C 320 640 640 730 960 675 C 1180 640 1320 705 1440 668 L1440 900 L0 900 Z"/></clipPath>
+    </defs>
+
+    <!-- hills -->
+    <path d="M0 470 C 220 380 380 430 560 400 C 760 366 900 430 1090 402 C 1250 380 1360 410 1440 392 L1440 560 L0 560 Z" fill="url(#hf)"/>
+    <path d="M0 505 C 260 440 430 486 640 460 C 860 432 1010 486 1210 462 C 1330 448 1400 470 1440 460 L1440 620 L0 620 Z" fill="url(#hm)"/>
+
+    <!-- field bands (far -> near) -->
+    <path d="M0 505 C 300 470 560 520 820 496 C 1060 474 1250 512 1440 490 L1440 590 L0 590 Z" fill="url(#f1)"/>
+    <path d="M0 560 C 360 500 620 600 900 555 C 1130 520 1300 575 1440 545 L1440 640 L0 640 Z" fill="url(#f2)"/>
+    <g clip-path="url(#clip3)"><rect x="0" y="500" width="1440" height="260" fill="url(#f3)"/><rect x="0" y="500" width="1440" height="260" fill="url(#rows3)" opacity=".5"/></g>
+    <g clip-path="url(#clip4)"><rect x="0" y="640" width="1440" height="300" fill="url(#f4)"/><rect x="0" y="640" width="1440" height="300" fill="url(#rows4)" opacity=".6"/></g>
+
+    <!-- winding mud path -->
+    <path d="M700 900 C 660 800 780 760 740 690 C 706 632 800 604 776 560 L 820 560 C 850 610 760 640 796 700 C 832 764 720 800 760 900 Z" fill="#7c4a2b" opacity=".9"/>
+    <path d="M732 900 C 704 812 800 772 768 700 C 742 646 812 616 792 566 L 804 566 C 830 616 758 646 786 704 C 818 772 726 812 752 900 Z" fill="#8a5533" opacity=".6"/>
+  </svg>
+
+  <div class="drizzle" data-depth="3"></div>
+  <div class="petals" id="petals"></div>
+</div>
+
+<div class="grain"></div>
+<div class="vignette"></div>
+
+<!-- ================= HERO ================= -->
+<main class="hero">
+  <div class="kicker">महाराष्ट्र · खरीप हंगाम · सह्याद्रीच्या कुशीत</div>
+  <h1 class="title"><span class="grn">हिरवं रान,</span> <span class="red">लाल राजा</span></h1>
+  <p class="subtitle">माझा ट्रॅक्टर <span class="dot">·</span> माझा अभिमान</p>
+
+  <div class="quote-wrap">
+    <div class="quote" id="quote"><span class="sprig">❧</span> जय जवान, जय किसान <span class="sprig">❧</span></div>
+    <div class="quote-en" id="quoteEn">Hail the soldier, hail the farmer</div>
+  </div>
+
+  <div class="stage-row">
+    <div class="tractor-stage" id="stage">
+      <div class="tractor" id="tractor" role="button" tabindex="0" aria-label="ट्रॅक्टरचा हॉर्न वाजवा">
+        <!-- ======= TRACTOR SVG ======= -->
+        <svg viewBox="0 0 900 560" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f15a4c"/><stop offset="1" stop-color="#c62a22"/></linearGradient>
+            <linearGradient id="bodyD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8352c"/><stop offset="1" stop-color="#a11c18"/></linearGradient>
+            <radialGradient id="tyre" cx="50%" cy="50%" r="50%"><stop offset="60%" stop-color="#26262a"/><stop offset="100%" stop-color="#141417"/></radialGradient>
+            <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd24a"/><stop offset="1" stop-color="#e59c14"/></linearGradient>
+            <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe9ff"/><stop offset="1" stop-color="#7fb9dd"/></linearGradient>
+          </defs>
+
+          <!-- ground shadow -->
+          <ellipse cx="430" cy="512" rx="360" ry="26" fill="#0c2410" opacity=".18"/>
+
+          <!-- exhaust pipe -->
+          <rect x="298" y="150" width="26" height="150" rx="8" fill="#3a3a40"/>
+          <rect x="292" y="142" width="38" height="18" rx="6" fill="#2a2a30"/>
+
+          <!-- rear body / fender -->
+          <path d="M250 300 Q250 150 330 150 L470 150 Q500 150 500 200 L500 300 Z" fill="url(#bodyD)"/>
+          <!-- cabin frame -->
+          <rect x="330" y="120" width="14" height="150" rx="6" fill="#7c1512"/>
+          <rect x="470" y="120" width="14" height="150" rx="6" fill="#7c1512"/>
+          <rect x="330" y="112" width="160" height="16" rx="7" fill="#8e1c1c"/>
+          <!-- seat -->
+          <path d="M356 250 q0 -40 40 -40 l30 0 0 44 -34 0 0 30 -36 0 z" fill="#3a241a"/>
+          <path d="M356 250 q0 -34 36 -34 l24 0 0 30 -30 0 0 26 -30 0 z" fill="#5a3a26"/>
+
+          <!-- FARMER silhouette with white topi -->
+          <g>
+            <path d="M392 214 q22 -4 26 18 l4 40 -34 0 q-4 -40 4 -58 z" fill="#f4f1e6"/><!-- shirt -->
+            <circle cx="404" cy="196" r="16" fill="#8a5a3a"/><!-- head -->
+            <path d="M386 190 q18 -16 36 0 q-18 -8 -36 0 z" fill="#fbfaf3"/><!-- topi -->
+            <path d="M416 232 q34 6 52 34" stroke="#8a5a3a" stroke-width="9" fill="none" stroke-linecap="round"/><!-- arm to wheel -->
+          </g>
+
+          <!-- steering -->
+          <line x1="470" y1="300" x2="486" y2="238" stroke="#2a2a2e" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="490" cy="232" r="16" fill="none" stroke="#2a2a2e" stroke-width="7"/>
+
+          <!-- main body / hood -->
+          <path d="M470 300 L470 232 Q470 210 500 210 L520 210 L560 250 L760 250 Q792 250 792 288 L792 360 Q792 392 760 392 L470 392 Z" fill="url(#body)"/>
+          <!-- hood top highlight -->
+          <path d="M520 210 L560 250 L740 250 Q762 250 762 268 L520 268 Z" fill="#ff7a6a" opacity=".55"/>
+          <!-- side panel line -->
+          <rect x="470" y="330" width="322" height="10" fill="#8e1c1c" opacity=".5"/>
+
+          <!-- grille -->
+          <rect x="770" y="286" width="26" height="86" rx="8" fill="#2a2a30"/>
+          <g stroke="#5a5a62" stroke-width="3">
+            <line x1="774" y1="298" x2="792" y2="298"/><line x1="774" y1="312" x2="792" y2="312"/>
+            <line x1="774" y1="326" x2="792" y2="326"/><line x1="774" y1="340" x2="792" y2="340"/>
+            <line x1="774" y1="354" x2="792" y2="354"/>
+          </g>
+          <!-- headlight -->
+          <circle cx="782" cy="270" r="13" fill="#fff3b0" stroke="#e0a51e" stroke-width="3"/>
+          <circle cx="778" cy="266" r="4" fill="#fff"/>
+
+          <!-- brand plate -->
+          <rect x="556" y="292" width="150" height="40" rx="8" fill="#fff" opacity=".92"/>
+          <text x="631" y="313" text-anchor="middle" font-family="'Baloo 2',sans-serif" font-weight="800" font-size="22" fill="#c62a22">महिंद्रा</text>
+          <text x="631" y="329" text-anchor="middle" font-family="'Baloo 2',sans-serif" font-weight="800" font-size="12" letter-spacing="2" fill="#3a3a40">५७५ DI</text>
+
+          <!-- marigold garland on grille -->
+          <g id="garland">
+            <path d="M796 288 Q812 330 792 372" fill="none" stroke="#2f7a1e" stroke-width="3"/>
+            <circle cx="800" cy="296" r="8" fill="#ff9f1c"/><circle cx="806" cy="312" r="9" fill="#ffb733"/>
+            <circle cx="806" cy="330" r="9" fill="#ff8f1a"/><circle cx="804" cy="348" r="8" fill="#ffc23c"/>
+            <circle cx="797" cy="364" r="8" fill="#ff9f1c"/>
+            <circle cx="800" cy="296" r="3" fill="#b85c00"/><circle cx="806" cy="330" r="3" fill="#b85c00"/>
+          </g>
+
+          <!-- REAR WHEEL (big) -->
+          <g class="wheel-rot" id="wheelR">
+            <circle cx="330" cy="400" r="128" fill="url(#tyre)"/>
+            <circle cx="330" cy="400" r="128" fill="none" stroke="#0c0c0e" stroke-width="8"/>
+            <g stroke="#0a0a0c" stroke-width="10">
+              <line x1="222" y1="360" x2="240" y2="372"/><line x1="222" y1="440" x2="240" y2="428"/>
+              <line x1="438" y1="360" x2="420" y2="372"/><line x1="438" y1="440" x2="420" y2="428"/>
+              <line x1="290" y1="282" x2="302" y2="300"/><line x1="370" y1="282" x2="358" y2="300"/>
+              <line x1="290" y1="518" x2="302" y2="500"/><line x1="370" y1="518" x2="358" y2="500"/>
+              <line x1="210" y1="400" x2="234" y2="400"/><line x1="450" y1="400" x2="426" y2="400"/>
+              <line x1="330" y1="278" x2="330" y2="302"/><line x1="330" y1="522" x2="330" y2="498"/>
+            </g>
+            <circle cx="330" cy="400" r="62" fill="url(#rim)"/>
+            <circle cx="330" cy="400" r="62" fill="none" stroke="#b8790a" stroke-width="5"/>
+            <g fill="#a86c08"><circle cx="330" cy="358" r="6"/><circle cx="366" cy="380" r="6"/><circle cx="366" cy="420" r="6"/><circle cx="330" cy="442" r="6"/><circle cx="294" cy="420" r="6"/><circle cx="294" cy="380" r="6"/></g>
+            <circle cx="330" cy="400" r="20" fill="#2a2a30"/><circle cx="330" cy="400" r="9" fill="#5a5a62"/>
+          </g>
+
+          <!-- FRONT WHEEL (small) -->
+          <g class="wheel-rot" id="wheelF">
+            <circle cx="726" cy="440" r="76" fill="url(#tyre)"/>
+            <circle cx="726" cy="440" r="76" fill="none" stroke="#0c0c0e" stroke-width="6"/>
+            <g stroke="#0a0a0c" stroke-width="7">
+              <line x1="660" y1="412" x2="674" y2="420"/><line x1="660" y1="468" x2="674" y2="460"/>
+              <line x1="792" y1="412" x2="778" y2="420"/><line x1="792" y1="468" x2="778" y2="460"/>
+              <line x1="726" y1="368" x2="726" y2="386"/><line x1="726" y1="512" x2="726" y2="494"/>
+            </g>
+            <circle cx="726" cy="440" r="34" fill="url(#rim)"/>
+            <circle cx="726" cy="440" r="14" fill="#2a2a30"/>
+          </g>
+
+          <!-- little grass tufts at base -->
+          <g fill="#2e8a24">
+            <path d="M470 470 q-6 -22 4 -34 q2 18 8 26 q6 -12 16 -16 q-4 16 -8 24 z"/>
+            <path d="M540 476 q-4 -18 4 -28 q2 14 6 20 q6 -10 14 -12 q-4 12 -8 20 z"/>
+          </g>
+        </svg>
+        <div class="honk-bubble" id="bubble">पॉं... पॉं!</div>
+      </div>
+      <div class="ground-shadow"></div>
+      <span class="anchor" id="exhaust"></span>
+      <span class="anchor" id="dust"></span>
+    </div>
+
+    <aside class="status-card">
+      <h3><span class="live"></span> ट्रॅक्टरची स्थिती</h3>
+      <div class="srow"><span class="k">इंजिन</span><span class="v"><span class="pill">चालू</span></span></div>
+      <div class="srow"><span class="k">डिझेल</span><span class="v">पूर्ण टाकी ⛽</span></div>
+      <div class="srow"><span class="k">पीक</span><span class="v">ऊस · भात 🌾</span></div>
+      <div class="srow"><span class="k">हंगाम</span><span class="v"><span class="pill warn">खरीप</span></span></div>
+      <div class="srow"><span class="k">माती</span><span class="v">ओली चिंब 💧</span></div>
+      <div class="srow"><span class="k">आवाज</span><span class="v">फटफट फटफट</span></div>
+    </aside>
+  </div>
+
+  <div class="memories">
+    <span class="chip"><span class="em">🐂</span>बैल पोळा</span>
+    <span class="chip"><span class="em">🌼</span>झेंडूचा हार</span>
+    <span class="chip"><span class="em">🚜</span>ट्रॉलीतली सैर</span>
+    <span class="chip"><span class="em">⛽</span>डिझेलचा वास</span>
+    <span class="chip"><span class="em">🏔️</span>सह्याद्रीचं रान</span>
+    <span class="chip"><span class="em">🌧️</span>पहिला पाऊस</span>
+    <span class="chip"><span class="em">🎶</span>फटफट फटफट</span>
+  </div>
+
+  <div class="hint">ट्रॅक्टरवर टिचकी मारा किंवा <kbd>H</kbd> दाबा — हॉर्न वाजवा! · <kbd>Space</kbd> गाणं · <kbd>←</kbd> <kbd>→</kbd> पुढचं–मागचं</div>
+</main>
+
+<!-- ================= MUSIC PLAYER ================= -->
+<section class="player" id="player" aria-label="संगीत प्लेयर">
+  <div class="disc" aria-hidden="true">
+    <svg viewBox="0 0 52 52"><g>
+      <circle cx="26" cy="26" r="24" fill="#1b1b1e"/>
+      <circle cx="26" cy="26" r="24" fill="none" stroke="#0a0a0c" stroke-width="2"/>
+      <g stroke="#3a3a40" stroke-width="2">
+        <line x1="26" y1="4" x2="26" y2="10"/><line x1="26" y1="42" x2="26" y2="48"/>
+        <line x1="4" y1="26" x2="10" y2="26"/><line x1="42" y1="26" x2="48" y2="26"/>
+        <line x1="10" y1="10" x2="14" y2="14"/><line x1="38" y1="38" x2="42" y2="42"/>
+        <line x1="42" y1="10" x2="38" y2="14"/><line x1="14" y1="38" x2="10" y2="42"/>
+      </g>
+      <circle cx="26" cy="26" r="11" fill="#e59c14"/><circle cx="26" cy="26" r="4" fill="#1b1b1e"/>
+    </g></svg>
+  </div>
+  <div class="pmeta">
+    <div class="pnow"><span class="eq"><i></i><i></i><i></i><i></i></span> आत्ता वाजतंय</div>
+    <div class="ptitle" id="ptitle">प्लेलिस्ट लोड होत आहे…</div>
+    <div class="prog">
+      <span class="ptime" id="tcur">0:00</span>
+      <div class="bar" id="bar"><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div>
+      <span class="ptime" id="tdur">0:00</span>
+    </div>
+  </div>
+  <div class="pctrls">
+    <button class="pbtn mute" id="mute" aria-label="आवाज बंद/चालू">
+      <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+    </button>
+    <button class="pbtn" id="prev" aria-label="मागचं गाणं">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L9 12z"/></svg>
+    </button>
+    <button class="pbtn play" id="play" aria-label="वाजवा / थांबवा">
+      <svg id="playIco" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="pbtn" id="next" aria-label="पुढचं गाणं">
+      <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6l11 6L4 18z"/></svg>
+    </button>
+  </div>
+</section>
+
+<div id="yt"></div>
+
+<!-- ================= SCRIPT ================= -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){return document.getElementById(id);};
+
+  /* ---------- ROTATING QUOTES ---------- */
+  var QUOTES = [
+    ["जय जवान, जय किसान","Hail the soldier, hail the farmer"],
+    ["उत्तम शेती, मध्यम व्यापार, कनिष्ठ नोकरी","Farming is the noblest of all work"],
+    ["काळ्या आईची सेवा हीच खरी पूजा","Serving the soil-mother is true worship"],
+    ["बळीराजा सुखी, तर सारं जग सुखी","When the farmer thrives, the whole world thrives"],
+    ["घाम गाळल्याशिवाय मोती पिकत नाही","No pearls are grown without shedding sweat"],
+    ["मातीशी नातं, हेच खरं धन","The bond with the soil is the real wealth"],
+    ["पावसाच्या सरींनी सारं रान न्हालं","The whole field bathed in the monsoon showers"],
+    ["पेरलं तेच उगवतं — हा निसर्गाचा नियम","You reap what you sow — nature's own law"],
+    ["फटफट करत ट्रॅक्टर आलं, रान सारं जागं झालं","The tractor put-puts in, and the whole field wakes"],
+    ["शेत हिरवं, तर मन हिरवं","When the field is green, the heart is green too"]
+  ];
+  var qEl=$("quote"), qEn=$("quoteEn"), qi=0;
+  function showQuote(i){
+    qEl.classList.remove("show"); qEn.classList.remove("show");
+    setTimeout(function(){
+      qEl.innerHTML='<span class="sprig">❧</span> '+QUOTES[i][0]+' <span class="sprig">❧</span>';
+      qEn.textContent=QUOTES[i][1];
+      qEl.classList.add("show"); qEn.classList.add("show");
+    },520);
+  }
+  showQuote(0);
+  setInterval(function(){ qi=(qi+1)%QUOTES.length; showQuote(qi); },5200);
+
+  /* ---------- PETALS ---------- */
+  var petalLayer=$("petals");
+  var PCOLORS=["#ff9f1c","#ffc23c","#ff7a1a","#ffd24a","#f6f9b0"];
+  function spawnPetal(){
+    if(document.hidden) return;
+    var p=document.createElement("div"); p.className="petal";
+    var s=6+Math.random()*10;
+    p.style.width=s+"px"; p.style.height=(s*0.7)+"px";
+    p.style.background=PCOLORS[(Math.random()*PCOLORS.length)|0];
+    p.style.left=(Math.random()*100)+"vw";
+    p.style.opacity=0.5+Math.random()*0.4;
+    var dur=7+Math.random()*7, sway=(Math.random()*160-80);
+    p.animate([
+      {transform:"translate(0,-30px) rotate(0deg)",opacity:0},
+      {opacity:1,offset:.12},
+      {transform:"translate("+sway+"px,102vh) rotate("+(360+Math.random()*360)+"deg)",opacity:0}
+    ],{duration:dur*1000,easing:"linear"}).onfinish=function(){p.remove();};
+    petalLayer.appendChild(p);
+  }
+  setInterval(spawnPetal,900);
+  for(var k=0;k<5;k++) setTimeout(spawnPetal,k*400);
+
+  /* ---------- PARALLAX ---------- */
+  var layers=[].slice.call(document.querySelectorAll("[data-depth]"));
+  var px=0,py=0,cx=0,cy=0;
+  window.addEventListener("mousemove",function(e){
+    px=(e.clientX/window.innerWidth-0.5); py=(e.clientY/window.innerHeight-0.5);
+  },{passive:true});
+  (function loop(){
+    cx+=(px-cx)*0.06; cy+=(py-cy)*0.06;
+    for(var i=0;i<layers.length;i++){
+      var d=parseFloat(layers[i].getAttribute("data-depth"))||0;
+      layers[i].style.transform="translate("+(-cx*d*2.2)+"px,"+(-cy*d*1.4)+"px)";
+    }
+    requestAnimationFrame(loop);
+  })();
+
+  /* ---------- AUDIO: horn ---------- */
+  var actx=null;
+  function ensureAudio(){
+    if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } }
+    if(actx.state==="suspended") actx.resume();
+    return actx;
+  }
+  function honkSound(){
+    var ctx=ensureAudio(); if(!ctx) return;
+    var t0=ctx.currentTime;
+    [0,0.30].forEach(function(off){
+      var t=t0+off;
+      var g=ctx.createGain(); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.28,t+0.03);
+      g.gain.setValueAtTime(0.26,t+0.16);
+      g.gain.exponentialRampToValueAtTime(0.0008,t+0.26);
+      [220,330,440].forEach(function(f,i){
+        var o=ctx.createOscillator(); o.type="sawtooth"; o.frequency.value=f;
+        var og=ctx.createGain(); og.gain.value=[0.5,0.34,0.2][i];
+        o.connect(og); og.connect(g); o.start(t); o.stop(t+0.27);
+      });
+    });
+  }
+
+  /* ---------- SMOKE & DUST ---------- */
+  var stage=$("stage"), exEl=$("exhaust"), duEl=$("dust");
+  function anchorPos(el){
+    var s=stage.getBoundingClientRect(), a=el.getBoundingClientRect();
+    return {x:a.left-s.left+a.width/2, y:a.top-s.top+a.height/2};
+  }
+  function puff(big){
+    var p=anchorPos(exEl);
+    var d=document.createElement("div"); d.className="smoke";
+    var sz=(big?26:12)+Math.random()*(big?26:12);
+    d.style.width=sz+"px"; d.style.height=sz+"px";
+    d.style.left=(p.x-sz/2)+"px"; d.style.top=(p.y-sz/2)+"px";
+    stage.appendChild(d);
+    var driftX=(Math.random()*40-14)+(big?(Math.random()*40-20):0);
+    var rise=(big?150:110)+Math.random()*70;
+    d.animate([
+      {transform:"translate(0,0) scale(.5)",opacity:.0},
+      {opacity:(big?.7:.5),offset:.15},
+      {transform:"translate("+driftX+"px,"+(-rise)+"px) scale("+(big?2.4:1.9)+")",opacity:0}
+    ],{duration:(big?2400:2100)+Math.random()*600,easing:"ease-out"}).onfinish=function(){d.remove();};
+  }
+  function dustBurst(){
+    var p=anchorPos(duEl);
+    for(var i=0;i<9;i++){
+      (function(){
+        var d=document.createElement("div"); d.className="dust";
+        var sz=8+Math.random()*16; d.style.width=sz+"px"; d.style.height=sz+"px";
+        d.style.left=(p.x-sz/2)+"px"; d.style.top=(p.y-sz/2)+"px";
+        stage.appendChild(d);
+        var ang=Math.PI*(0.6+Math.random()*0.8), dist=40+Math.random()*90;
+        var dx=-Math.cos(ang)*dist, dy=-Math.abs(Math.sin(ang))*dist*0.7;
+        d.animate([
+          {transform:"translate(0,0) scale(.4)",opacity:.0},
+          {opacity:.75,offset:.2},
+          {transform:"translate("+dx+"px,"+dy+"px) scale(1.8)",opacity:0}
+        ],{duration:1000+Math.random()*500,easing:"ease-out"}).onfinish=function(){d.remove();};
+      })();
+    }
+  }
+  // steady idle exhaust
+  setInterval(function(){ if(!document.hidden) puff(false); },700);
+
+  /* ---------- HONK INTERACTION ---------- */
+  var tractor=$("tractor"), bubble=$("bubble"), wR=$("wheelR"), wF=$("wheelF");
+  var honkLock=false;
+  function honk(){
+    honkSound();
+    if(!honkLock){
+      honkLock=true;
+      tractor.classList.remove("honk"); void tractor.offsetWidth; tractor.classList.add("honk");
+      bubble.classList.remove("show"); void bubble.offsetWidth; bubble.classList.add("show");
+      wR.classList.remove("spin"); wF.classList.remove("spin"); void wR.offsetWidth;
+      wR.classList.add("spin"); wF.classList.add("spin");
+      for(var i=0;i<6;i++) setTimeout(function(){puff(true);}, i*70);
+      dustBurst();
+      setTimeout(function(){honkLock=false;},650);
+    }
+  }
+  tractor.addEventListener("click",honk);
+  tractor.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();e.stopPropagation();honk();} });
+
+  /* ---------- YOUTUBE PLAYER ---------- */
+  var PLAYLIST="PL2Di--NcQaJNIcXxMYUPtvxdGP2hbn0l1";
+  var player=null, ytReady=false, playing=false, muted=false, progTimer=null;
+  var playerEl=$("player"), ptitle=$("ptitle"), fill=$("fill"), knob=$("knob"),
+      tcur=$("tcur"), tdur=$("tdur"), playIco=$("playIco");
+
+  window.onYouTubeIframeAPIReady=function(){
+    player=new YT.Player("yt",{
+      height:"1",width:"1",
+      playerVars:{listType:"playlist",list:PLAYLIST,controls:0,disablekb:1,
+        modestbranding:1,rel:0,playsinline:1,fs:0},
+      events:{onReady:onReady,onStateChange:onState,onError:onErr}
+    });
+  };
+  function onReady(){ ytReady=true; try{player.setVolume(60);}catch(e){} updateTrack(); }
+  function onErr(){ ptitle.textContent="गाणं लोड करता आलं नाही — पुढचं वाजवून बघा"; }
+  function onState(e){
+    if(e.data===YT.PlayerState.PLAYING){ playing=true; playerEl.classList.add("playing"); setIcon(true); startProg(); }
+    else if(e.data===YT.PlayerState.ENDED){ /* playlist auto-advances */ }
+    else { playing=false; playerEl.classList.remove("playing"); setIcon(false); }
+    updateTrack();
+  }
+  function setIcon(isPlaying){
+    playIco.innerHTML = isPlaying
+      ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'
+      : '<path d="M8 5v14l11-7z"/>';
+  }
+  function fmt(s){ s=Math.max(0,Math.floor(s||0)); var m=(s/60)|0, x=s%60; return m+":"+(x<10?"0":"")+x; }
+  function updateTrack(){
+    if(!ytReady||!player.getVideoData) return;
+    var d=player.getVideoData(); var idx=(player.getPlaylistIndex&&player.getPlaylistIndex());
+    var t=(d&&d.title)?d.title:"";
+    ptitle.textContent = t ? ((idx>=0?("गाणं "+(idx+1)+" · "):"")+t) : "प्ले दाबा — गाणं सुरू करा";
+  }
+  function startProg(){
+    if(progTimer) return;
+    progTimer=setInterval(function(){
+      if(!ytReady||!player.getDuration){return;}
+      var dur=player.getDuration()||0, cur=player.getCurrentTime()||0;
+      var pct=dur?(cur/dur*100):0;
+      fill.style.width=pct+"%"; knob.style.left=pct+"%";
+      tcur.textContent=fmt(cur); tdur.textContent=fmt(dur);
+      if(!playing){ clearInterval(progTimer); progTimer=null; }
+    },400);
+  }
+  function togglePlay(){
+    if(!ytReady){ return; }
+    ensureAudio();
+    if(playing) player.pauseVideo(); else player.playVideo();
+  }
+  $("play").addEventListener("click",togglePlay);
+  $("prev").addEventListener("click",function(){ if(ytReady){player.previousVideo();player.playVideo();} });
+  $("next").addEventListener("click",function(){ if(ytReady){player.nextVideo();player.playVideo();} });
+  $("mute").addEventListener("click",function(){
+    if(!ytReady) return; muted=!muted;
+    if(muted){player.mute();} else {player.unMute();}
+    $("mute").querySelector("svg").innerHTML = muted
+      ? '<path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16 8l6 8M22 8l-6 8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>'
+      : '<path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M15 8a5 5 0 0 1 0 8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>';
+  });
+  // seek
+  var bar=$("bar");
+  bar.addEventListener("click",function(e){
+    if(!ytReady||!player.getDuration) return;
+    var r=bar.getBoundingClientRect(); var frac=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
+    var dur=player.getDuration()||0; player.seekTo(frac*dur,true);
+    fill.style.width=(frac*100)+"%"; knob.style.left=(frac*100)+"%";
+  });
+
+  /* ---------- KEYBOARD ---------- */
+  window.addEventListener("keydown",function(e){
+    var k=e.key.toLowerCase();
+    if(k==="h"){ honk(); }
+    else if(e.key===" "){ e.preventDefault(); togglePlay(); }
+    else if(e.key==="ArrowRight"){ if(ytReady){player.nextVideo();player.playVideo();} }
+    else if(e.key==="ArrowLeft"){ if(ytReady){player.previousVideo();player.playVideo();} }
+    else if(k==="m"){ $("mute").click(); }
+  });
+})();
+</script>
+</body>
+</html>
