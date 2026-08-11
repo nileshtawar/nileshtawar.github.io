@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>माझ्या मातीचा लाल ट्रॅक्टर | Green Farming Playlist</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Teko:wght@400;600;700&family=Poppins:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --farm-green: #2E7D32;
+      --deep-green: #1B5E20;
+      --light-green: #4CAF50;
+      --field-lime: #81C784;
+      --soil-dark: #0B1B0E;
+      --soil-brown: #1E2E1B;
+      --gold: #FFC107;
+      --harvest-yellow: #FFD54F;
+      --glass-bg: rgba(11, 35, 16, 0.65);
+      --glass-border: rgba(129, 199, 132, 0.25);
+      --text-gold: #FFE082;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--soil-dark);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Background Canvas */
+    .sky-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: linear-gradient(to bottom, #031206 0%, #0c2b12 30%, #17481d 60%, #2e7d32 80%, #0b1b0e 100%);
+      overflow: hidden;
+    }
+
+    .sun {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(255, 224, 130, 0.9) 0%, rgba(129, 199, 132, 0.5) 40%, rgba(46, 125, 50, 0) 70%);
+      border-radius: 50%;
+      filter: blur(10px);
+      animation: sunGlow 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes sunGlow {
+      0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.8; }
+      100% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+    }
+
+    .mountains {
+      position: absolute;
+      bottom: 220px;
+      width: 100%;
+      height: 200px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0,200 L0,120 Q150,40 350,110 Q500,160 700,70 Q900,10 1050,90 Q1150,130 1200,100 L1200,200 Z" fill="%230a240f" opacity="0.85"/></svg>');
+      background-size: cover;
+    }
+
+    .mountains-front {
+      position: absolute;
+      bottom: 180px;
+      width: 100%;
+      height: 160px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 160" preserveAspectRatio="none"><path d="M0,160 L0,90 Q200,140 450,60 Q700,130 950,50 Q1100,80 1200,60 L1200,160 Z" fill="%23061709"/></svg>');
+      background-size: cover;
+    }
+
+    .field-lines {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(to bottom, #113816 0%, #081a0a 100%);
+      border-top: 3px solid var(--light-green);
+      box-shadow: 0 -10px 30px rgba(76, 175, 80, 0.3);
+    }
+
+    canvas#dust-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Main Container */
+    .main-layout {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 160px 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .sub-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 50px;
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      font-size: 0.9rem;
+      color: var(--text-gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .title-marathi {
+      font-family: 'Rozha One', serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      background: linear-gradient(180deg, #FFF 20%, #A5D6A7 60%, #4CAF50 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 10px 25px rgba(0,0,0,0.8);
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    .title-sub {
+      font-family: 'Teko', sans-serif;
+      font-size: 1.8rem;
+      color: #C8E6C9;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: -5px;
+      opacity: 0.9;
+    }
+
+    .cultural-details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    .detail-tag {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #E8F5E9;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+
+    .detail-tag:hover {
+      transform: translateY(-2px);
+      border-color: var(--light-green);
+    }
+
+    .detail-tag i {
+      color: var(--gold);
+    }
+
+    .quote-card {
+      margin-top: 1.5rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 650px;
+      width: 100%;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quote-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--light-green);
+    }
+
+    .quote-text {
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: #FFF;
+      font-style: italic;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .quote-author {
+      font-size: 0.85rem;
+      color: var(--text-gold);
+      margin-top: 4px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    /* Tractor Stage */
+    .tractor-stage {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      margin: 2rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .tractor-wrapper {
+      position: relative;
+      width: 100%;
+      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.7));
+      transition: transform 0.3s ease;
+    }
+
+    .tractor-wrapper:hover {
+      transform: scale(1.02);
+    }
+
+    .nimbu-mirchi {
+      position: absolute;
+      top: 10px;
+      right: 15%;
+      z-index: 15;
+      width: 35px;
+      animation: swing 3s ease-in-out infinite alternate;
+      transform-origin: top center;
+    }
+
+    @keyframes swing {
+      0% { transform: rotate(-8deg); }
+      100% { transform: rotate(8deg); }
+    }
+
+    #smoke-container {
+      position: absolute;
+      top: 18%;
+      left: 33%;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .smoke-puff {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: rgba(200, 220, 200, 0.6);
+      border-radius: 50%;
+      animation: smokeRise 1.8s linear forwards;
+    }
+
+    @keyframes smokeRise {
+      0% { transform: translate(0, 0) scale(0.6); opacity: 0.7; }
+      100% { transform: translate(-40px, -90px) scale(3.5); opacity: 0; }
+    }
+
+    .headlight-beam {
+      position: absolute;
+      bottom: 38%;
+      right: -10%;
+      width: 300px;
+      height: 120px;
+      background: linear-gradient(90deg, rgba(255, 245, 180, 0.85) 0%, rgba(255, 235, 120, 0.3) 50%, rgba(255, 220, 0, 0) 100%);
+      clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 11;
+    }
+
+    .headlight-beam.on {
+      opacity: 1;
+      animation: flicker 4s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 0.75; }
+      70% { opacity: 0.95; }
+    }
+
+    .interactive-hint {
+      margin-top: 12px;
+      background: rgba(0,0,0,0.6);
+      border: 1px dashed var(--light-green);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: pulseHint 2s infinite;
+    }
+
+    @keyframes pulseHint {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+
+    .sound-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 0.5rem;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: var(--text-gold);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      backdrop-filter: blur(5px);
+    }
+
+    .action-btn:hover {
+      background: rgba(76, 175, 80, 0.25);
+      border-color: var(--light-green);
+      color: #fff;
+    }
+
+    /* Player Bar */
+    .player-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 850px;
+      background: rgba(11, 27, 14, 0.85);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 14px 24px;
+      z-index: 100;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .track-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .album-art {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--light-green), var(--deep-green));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .album-art.playing i {
+      animation: spinVinyl 4s linear infinite;
+    }
+
+    @keyframes spinVinyl {
+      100% { transform: rotate(360deg); }
+    }
+
+    .track-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .track-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #FFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-artist {
+      font-size: 0.75rem;
+      color: var(--text-gold);
+      opacity: 0.85;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-ctrl {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ctrl:hover {
+      background: var(--light-green);
+      color: #fff;
+      transform: scale(1.08);
+    }
+
+    .btn-ctrl.btn-main {
+      width: 48px;
+      height: 48px;
+      background: var(--farm-green);
+      font-size: 1.1rem;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+
+    .btn-ctrl.btn-main:hover {
+      background: var(--light-green);
+      transform: scale(1.1);
+    }
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .time-stamp {
+      font-size: 0.7rem;
+      color: #aaa;
+      font-family: monospace;
+      min-width: 35px;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--light-green));
+      border-radius: 10px;
+      transition: width 0.1s linear;
+    }
+
+    .hidden-players {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .title-marathi { font-size: 2.4rem; }
+      .title-sub { font-size: 1.3rem; }
+      .player-bar { padding: 10px 16px; bottom: 12px; }
+      .sound-actions { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sky & Canvas Background -->
+  <div class="sky-container">
+    <div class="sun"></div>
+    <div class="mountains"></div>
+    <div class="mountains-front"></div>
+    <div class="field-lines"></div>
+    <canvas id="dust-canvas"></canvas>
+  </div>
+
+  <div class="main-layout">
+    
+    <header>
+      <div class="sub-badge">
+        <i class="fa-solid fa-leaf"></i> हिरवेगार रान &bull; शेतकरी संगीत
+      </div>
+      <h1 class="title-marathi">शेतातला लाल ट्रॅक्टर</h1>
+      <div class="title-sub">Shetatla Tractor &bull; Green Farm Songs</div>
+
+      <div class="cultural-details">
+        <span class="detail-tag"><i class="fa-solid fa-seedling"></i> हिरवे शेत (Green Fields)</span>
+        <span class="detail-tag"><i class="fa-solid fa-wheat-awn"></i> समृद्ध शिवार (Harvest Season)</span>
+        <span class="detail-tag"><i class="fa-solid fa-list"></i> Playing Custom YouTube Playlist</span>
+        <span class="detail-tag"><i class="fa-solid fa-flag"></i> जय जवान, जय किसान</span>
+      </div>
+    </header>
+
+    <div class="quote-card">
+      <div class="quote-text" id="quoteText">"हिरवेगार शिवार, लाल ट्रॅक्टरची साथ आणि मातीचा गंध..."</div>
+      <div class="quote-author" id="quoteAuthor">- Green Farm Memories</div>
+    </div>
+
+    <div class="tractor-stage" id="tractorStage" onclick="handleTractorInteraction()">
+      
+      <div id="smoke-container"></div>
+
+      <svg class="nimbu-mirchi" viewBox="0 0 40 100">
+        <line x1="20" y1="0" x2="20" y2="20" stroke="#000" stroke-width="2"/>
+        <path d="M15,20 Q10,35 12,50 Q14,35 20,20 Z" fill="#2E7D32"/>
+        <path d="M25,22 Q30,37 28,52 Q24,37 20,22 Z" fill="#C62828"/>
+        <circle cx="20" cy="62" r="10" fill="#FFEB3B" stroke="#F57F17" stroke-width="1.5"/>
+        <circle cx="20" cy="62" r="2" fill="#F57F17"/>
+        <path d="M20,72 Q16,85 18,98 Q22,85 20,72 Z" fill="#2E7D32"/>
+      </svg>
+
+      <div class="tractor-wrapper">
+        <div class="headlight-beam" id="headlightBeam"></div>
+
+        <svg viewBox="0 0 800 450" width="100%" height="auto">
+          <defs>
+            <linearGradient id="tractorRed" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FF3333"/>
+              <stop offset="60%" stop-color="#D32F2F"/>
+              <stop offset="100%" stop-color="#8B0000"/>
+            </linearGradient>
+            <linearGradient id="metalChrome" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#EEEEEE"/>
+              <stop offset="50%" stop-color="#BDBDBD"/>
+              <stop offset="100%" stop-color="#616161"/>
+            </linearGradient>
+            <linearGradient id="rubberTire" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#424242"/>
+              <stop offset="70%" stop-color="#212121"/>
+              <stop offset="100%" stop-color="#0D0D0D"/>
+            </linearGradient>
+            <filter id="shadow">
+              <feDropShadow dx="0" dy="12" stdDeviation="8" flood-color="#000" flood-opacity="0.6"/>
+            </filter>
+          </defs>
+
+          <ellipse cx="400" cy="390" rx="360" ry="25" fill="#030A04" opacity="0.8"/>
+
+          <g transform="translate(180, 110)">
+            <line x1="0" y1="0" x2="0" y2="110" stroke="#8D6E63" stroke-width="4"/>
+            <path d="M0,5 L50,20 L0,38 Z" fill="#4CAF50"/>
+          </g>
+
+          <g>
+            <rect x="290" y="110" width="14" height="90" fill="url(#metalChrome)" rx="3"/>
+            <path d="M285,110 L309,110 L304,100 L290,100 Z" fill="#424242"/>
+            <rect x="284" y="96" width="22" height="4" fill="#BDBDBD" id="exhaustCap"/>
+          </g>
+
+          <path d="M280,200 L490,200 L520,240 L520,310 L280,310 Z" fill="url(#tractorRed)" filter="url(#shadow)"/>
+          
+          <path d="M490,200 L520,240 L520,310 L490,310 Z" fill="#1A1A1A"/>
+          <line x1="498" y1="220" x2="498" y2="300" stroke="#FFC107" stroke-width="3"/>
+          <line x1="506" y1="230" x2="506" y2="300" stroke="#FFC107" stroke-width="3"/>
+          <line x1="514" y1="240" x2="514" y2="300" stroke="#FFC107" stroke-width="3"/>
+
+          <text x="320" y="245" font-family="'Rozha One', serif" font-size="22" fill="#FFD700" font-weight="bold">स्वराज 744</text>
+          <text x="320" y="270" font-family="'Teko', sans-serif" font-size="16" fill="#FFF" letter-spacing="2">SHETKARI KING</text>
+
+          <path d="M210,210 C210,180 230,170 250,170 L260,220 Z" fill="#111"/>
+          <line x1="310" y1="200" x2="280" y2="165" stroke="#333" stroke-width="6"/>
+          <ellipse cx="275" cy="160" rx="20" ry="6" fill="none" stroke="#111" stroke-width="5"/>
+
+          <path d="M140,290 C140,190 250,190 310,240 L290,310 L150,310 Z" fill="url(#tractorRed)"/>
+
+          <g filter="url(#shadow)">
+            <circle cx="220" cy="320" r="85" fill="url(#rubberTire)"/>
+            <path d="M150,280 L165,270 M160,330 L175,320 M190,380 L205,370 M250,385 L260,370 M280,340 L290,325 M280,280 L290,265 M240,245 L250,230" stroke="#111" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="220" cy="320" r="48" fill="url(#metalChrome)"/>
+            <circle cx="220" cy="320" r="30" fill="#FFC107"/>
+            <circle cx="220" cy="320" r="10" fill="#212121"/>
+            <circle cx="208" cy="310" r="3" fill="#FFF"/>
+            <circle cx="232" cy="310" r="3" fill="#FFF"/>
+            <circle cx="208" cy="330" r="3" fill="#FFF"/>
+            <circle cx="232" cy="330" r="3" fill="#FFF"/>
+          </g>
+
+          <g filter="url(#shadow)">
+            <circle cx="480" cy="345" r="45" fill="url(#rubberTire)"/>
+            <circle cx="480" cy="345" r="24" fill="url(#metalChrome)"/>
+            <circle cx="480" cy="345" r="14" fill="#FFC107"/>
+            <circle cx="480" cy="345" r="5" fill="#111"/>
+          </g>
+
+          <circle cx="510" cy="235" r="14" fill="#333" stroke="#FFC107" stroke-width="2"/>
+          <circle cx="512" cy="235" r="10" fill="#FFF9C4" id="headlightGlass"/>
+
+          <rect x="520" y="300" width="30" height="40" fill="#212121" rx="4"/>
+          <line x1="525" y1="300" x2="525" y2="340" stroke="#555" stroke-width="3"/>
+          <line x1="535" y1="300" x2="535" y2="340" stroke="#555" stroke-width="3"/>
+
+          <g transform="translate(535, 345)">
+            <line x1="0" y1="0" x2="0" y2="12" stroke="#FFC107" stroke-width="2"/>
+            <path d="M-6,12 C-6,6 6,6 6,12 L8,20 L-8,20 Z" fill="#FFD700"/>
+            <circle cx="0" cy="22" r="2.5" fill="#5D4037"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="interactive-hint">
+        <i class="fa-solid fa-hand-pointer"></i> <b>Click Tractor</b> or press <b>SPACE</b> for Horn! (Press <b>H</b> for Lights)
+      </div>
+    </div>
+
+    <!-- Interactive Audio Sound Buttons -->
+    <div class="sound-actions">
+      <button class="action-btn" onclick="playEngineHorn()"><i class="fa-solid fa-bullhorn"></i> Play Horn Sound</button>
+      <button class="action-btn" onclick="toggleHeadlights()"><i class="fa-solid fa-lightbulb"></i> Toggle Lights (H)</button>
+      <button class="action-btn" onclick="playDieselRevSound()"><i class="fa-solid fa-smog"></i> Rev Engine Sound</button>
+    </div>
+
+  </div>
+
+  <!-- Music Player Bar -->
+  <div class="player-bar">
+    <div class="player-main">
+      
+      <div class="track-info">
+        <div class="album-art" id="albumArt">
+          <i class="fa-solid fa-music"></i>
+        </div>
+        <div class="track-details">
+          <div class="track-title" id="trackTitle">Loading Farm Playlist...</div>
+          <div class="track-artist" id="trackArtist">Shetkatya Chya Hit Songs</div>
+        </div>
+      </div>
+
+      <div class="player-controls">
+        <button class="btn-ctrl" onclick="prevTrack()" title="Previous Song"><i class="fa-solid fa-backward-step"></i></button>
+        <button class="btn-ctrl btn-main" id="playBtn" onclick="togglePlay()" title="Play / Pause"><i class="fa-solid fa-play"></i></button>
+        <button class="btn-ctrl" onclick="nextTrack()" title="Next Song"><i class="fa-solid fa-forward-step"></i></button>
+      </div>
+
+    </div>
+
+    <div class="progress-container">
+      <span class="time-stamp" id="currTime">0:00</span>
+      <div class="progress-bar-bg" id="progressBg" onclick="seekTrack(event)">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <span class="time-stamp" id="durTime">0:00</span>
+    </div>
+  </div>
+
+  <!-- Hidden Players Container -->
+  <div class="hidden-players">
+    <div id="yt-playlist-player"></div>
+    <div id="yt-horn-player"></div>
+    <div id="yt-rev-player"></div>
+  </div>
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    /* 1. PARTICLES CANVAS */
+    const canvas = document.getElementById('dust-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = Math.random() * 0.8 - 0.2;
+        this.speedY = -(Math.random() * 0.5 + 0.1);
+        this.opacity = Math.random() * 0.7 + 0.2;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.y < 0 || this.x > canvas.width) {
+          this.reset();
+          this.y = canvas.height + 10;
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(165, 214, 167, ${this.opacity})`;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = "rgba(76, 175, 80, 0.8)";
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 65; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateDust() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateDust);
+    }
+    animateDust();
+
+    /* 2. ROTATING QUOTES */
+    const quotes = [
+      { text: '"हिरवेगार शिवार, लाल ट्रॅक्टरची साथ आणि मातीचा गंध..."', author: "- Green Farm Memories" },
+      { text: '"काळ्या मातीत हिरवी स्वप्नं फुलवणारा आपला शेतकरी राजा!"', author: "- Farm Life Marathi" },
+      { text: '"Fresh morning breeze in sugarcane fields and songs playing on the tractor!"', author: "- Rural Harvest" },
+      { text: '"रानातली हिरवळ आणि लाल ट्रॅक्टरचा रुबाब!"', author: "- Shetkari Power" }
+    ];
+
+    let quoteIdx = 0;
+    const quoteTextEl = document.getElementById('quoteText');
+    const quoteAuthorEl = document.getElementById('quoteAuthor');
+
+    setInterval(() => {
+      quoteIdx = (quoteIdx + 1) % quotes.length;
+      quoteTextEl.style.opacity = 0;
+      setTimeout(() => {
+        quoteTextEl.textContent = quotes[quoteIdx].text;
+        quoteAuthorEl.textContent = quotes[quoteIdx].author;
+        quoteTextEl.style.opacity = 1;
+      }, 500);
+    }, 6000);
+
+    /* 3. VISUAL EFFECTS */
+    function triggerExhaustSmoke() {
+      const container = document.getElementById('smoke-container');
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const puff = document.createElement('div');
+          puff.className = 'smoke-puff';
+          puff.style.left = (Math.random() * 8 - 4) + 'px';
+          container.appendChild(puff);
+
+          setTimeout(() => {
+            puff.remove();
+          }, 1800);
+        }, i * 120);
+      }
+    }
+
+    function toggleHeadlights() {
+      const beam = document.getElementById('headlightBeam');
+      const glass = document.getElementById('headlightGlass');
+      beam.classList.toggle('on');
+      if (beam.classList.contains('on')) {
+        glass.setAttribute('fill', '#FFFF00');
+      } else {
+        glass.setAttribute('fill', '#FFF9C4');
+      }
+    }
+
+    /* 4. YOUTUBE IFRAME PLAYERS FOR PLAYLIST & SOUND EFFECTS */
+    let player, hornPlayer, revPlayer;
+    let isPlaying = false;
+    let progressTimer;
+
+    function onYouTubeIframeAPIReady() {
+      // Main Playlist Player (Using Provided Playlist PL2Di--NcQaJNIcXxMYUPtvxdGP2hbn0l1)
+      player = new YT.Player('yt-playlist-player', {
+        height: '200',
+        width: '200',
+        playerVars: {
+          listType: 'playlist',
+          list: 'PL2Di--NcQaJNIcXxMYUPtvxdGP2hbn0l1',
+          autoplay: 0,
+          controls: 0,
+          enablejsapi: 1
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+
+      // Tractor Horn Player (Ou90h8AbIoQ)
+      hornPlayer = new YT.Player('yt-horn-player', {
+        height: '100',
+        width: '100',
+        videoId: 'Ou90h8AbIoQ',
+        playerVars: { autoplay: 0, controls: 0 }
+      });
+
+      // Tractor Rev/Start Player (OZigGf_uFpI)
+      revPlayer = new YT.Player('yt-rev-player', {
+        height: '100',
+        width: '100',
+        videoId: 'OZigGf_uFpI',
+        playerVars: { autoplay: 0, controls: 0 }
+      });
+    }
+
+    function onPlayerReady(event) {
+      updateTrackDetails();
+    }
+
+    function onPlayerStateChange(event) {
+      const playBtnIcon = document.querySelector('#playBtn i');
+      const albumArt = document.getElementById('albumArt');
+
+      if (event.data === YT.PlayerState.PLAYING) {
+        isPlaying = true;
+        playBtnIcon.className = 'fa-solid fa-pause';
+        albumArt.classList.add('playing');
+        startProgressLoop();
+        updateTrackDetails();
+      } else {
+        isPlaying = false;
+        playBtnIcon.className = 'fa-solid fa-play';
+        albumArt.classList.remove('playing');
+        stopProgressLoop();
+      }
+    }
+
+    function togglePlay() {
+      if (!player) return;
+      if (isPlaying) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+      }
+    }
+
+    function nextTrack() {
+      if (!player) return;
+      player.nextVideo();
+    }
+
+    function prevTrack() {
+      if (!player) return;
+      player.previousVideo();
+    }
+
+    function updateTrackDetails() {
+      if (!player || !player.getVideoData) return;
+      const data = player.getVideoData();
+      const titleEl = document.getElementById('trackTitle');
+      const artistEl = document.getElementById('trackArtist');
+
+      if (data && data.title) {
+        titleEl.textContent = data.title;
+        artistEl.textContent = data.author || "Shetkari Hit Song";
+      } else {
+        titleEl.textContent = "Green Farm Songs";
+        artistEl.textContent = "Playlist - PL2Di--NcQaJNIcXxMYUPtvxdGP2hbn0l1";
+      }
+    }
+
+    function startProgressLoop() {
+      stopProgressLoop();
+      progressTimer = setInterval(updateProgress, 500);
+    }
+
+    function stopProgressLoop() {
+      clearInterval(progressTimer);
+    }
+
+    function updateProgress() {
+      if (!player || !player.getCurrentTime) return;
+      
+      const current = player.getCurrentTime() || 0;
+      const duration = player.getDuration() || 0;
+
+      if (duration > 0) {
+        const pct = (current / duration) * 100;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('currTime').textContent = formatTime(current);
+        document.getElementById('durTime').textContent = formatTime(duration);
+      }
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function seekTrack(event) {
+      if (!player || !player.getDuration) return;
+      const bg = document.getElementById('progressBg');
+      const rect = bg.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const pct = clickX / rect.width;
+      const duration = player.getDuration();
+      
+      player.seekTo(duration * pct, true);
+    }
+
+    /* 5. PLAY SOUND EFFECTS FROM YOUTUBE LINKS */
+    function playEngineHorn() {
+      triggerExhaustSmoke();
+      if (hornPlayer && hornPlayer.seekTo) {
+        hornPlayer.seekTo(0);
+        hornPlayer.playVideo();
+      }
+    }
+
+    function playDieselRevSound() {
+      triggerExhaustSmoke();
+      if (revPlayer && revPlayer.seekTo) {
+        revPlayer.seekTo(0);
+        revPlayer.playVideo();
+      }
+    }
+
+    function handleTractorInteraction() {
+      playEngineHorn();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleTractorInteraction();
+      } else if (e.key.toLowerCase() === 'h') {
+        toggleHeadlights();
+      }
+    });
+  </script>
+</body>
+</html>
